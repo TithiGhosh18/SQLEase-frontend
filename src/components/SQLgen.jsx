@@ -25,7 +25,7 @@ export default function SQLgen() {
     formData.append('database_type', databaseType); // Add this
 
     try {
-      const res = await axios.post('http://localhost:5000/upload', formData);
+      const res = await axios.post('https://sqlease-backend.onrender.com/upload', formData);
       setResponse(res.data);
     } catch (err) {
       console.error(err);
