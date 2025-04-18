@@ -10,6 +10,8 @@ export default function SQLgen() {
   const [response, setResponse] = useState(null);
   const [databaseType, setDatabaseType] = useState('');
   const [loading, setLoading] = useState(false);
+  const [files, setFiles] = useState([]);
+
 
   const generatorRef = useRef(null);
 
@@ -18,12 +20,17 @@ export default function SQLgen() {
     e.preventDefault();
     setLoading(true);
     setResponse(null);
-    if (!file || !question || !databaseType) {
-      return alert("Please provide file, question, and select database type.");
+    if (files.length === 0 || !question || !databaseType) {
+      setLoading(false);
+      return alert("Please provide atleast one file, question, and select database type.");
+
     }
 
     const formData = new FormData();
-    formData.append('file', file);
+    files.forEach((file) => {
+      formData.append('files', file);
+    })
+
     formData.append('question', question);
     formData.append('database_type', databaseType); // Add this
 
@@ -37,6 +44,9 @@ export default function SQLgen() {
     finally {
       setLoading(false);
     }
+  };
+  const handleRemoveFile = (indexToRemove) => {
+    setFiles((prevFiles) => prevFiles.filter((_, idx) => idx !== indexToRemove));
   };
 
   return (
@@ -85,9 +95,31 @@ export default function SQLgen() {
           <input
             type="file"
             accept=".csv"
-            onChange={(e) => setFile(e.target.files[0])}
+            multiple
+            onChange={(e) => {
+              const selectedFiles = Array.from(e.target.files);
+              setFiles((prevFiles) => [...prevFiles, ...selectedFiles]); // append
+            }}
             className="w-full border rounded px-4 py-2"
           />
+          {files.length > 0 && (
+            <div className="mt-4">
+              <p className="font-semibold">Uploaded files:</p>
+              <ul className="list-disc pl-5 mt-2 space-y-1">
+                {files.map((file, index) => (
+                  <li key={index} className="flex justify-between items-center">
+                    <span>{file.name}</span>
+                    <button
+                      onClick={() => handleRemoveFile(index)}
+                      className="text-red-500 hover:underline text-sm ml-4"
+                    >
+                      ❌ Remove
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
 
           <button
             disabled={loading}
